@@ -1,0 +1,98 @@
+﻿@model IEnumerable<rcate_BugTracker.Models.CodeFirst.Project>
+
+@{
+    ViewBag.Title = "ArchiveAdmin";
+}
+
+<link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <i class="fa fa-area-chart"></i> All Archived Projects
+            </div>
+            <div class="col-md-6">
+                @if (User.IsInRole("Admin") || User.IsInRole("DemoA"))
+                {
+                    @Html.ActionLink("My Archived Projects", "AdminIndex", "Projects", new { @class = "pull-right btn" })
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Created</th>
+                        <th style="text-align:center">Personnel</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Created</th>
+                        <th style="text-align:center">Personnel</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        if (item.Archived == true)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    @Html.ToUserTime(item.Created, ViewBag.UserTimeZone as string, "MM/dd/yyyy")
+                                </td>
+                                <td>
+                                    @if (item.Users.Count() == 0)
+                                    {
+                                        <p class="text-danger">
+                                            No personnel Assigned
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        foreach (var user in item.Users)
+                                        {
+                                            @user.FullName <br />
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <center>
+                                        @if (User.IsInRole("Admin") || User.IsInRole("DemoA") || User.IsInRole("ProjectManager") || User.IsInRole("DemoP"))
+                                        {
+                                            using (Html.BeginForm("UndoArchive", "Projects", new { id = item.Id }, FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input style="border:none;background-color:white;color:red;cursor:pointer" type="submit" value="Un-Archive Project" />
+                                                <hr />
+                                            }
+                                        }
+                                        <a style="color:black" href="@Url.Action("Details", "Projects", new { id = item.Id })">Project Details</a>
+                                    </center>
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script>
+        $("#dataTable").DataTable();
+    </script>
+}

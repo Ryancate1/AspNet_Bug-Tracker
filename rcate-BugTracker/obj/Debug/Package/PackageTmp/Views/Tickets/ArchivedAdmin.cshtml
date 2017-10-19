@@ -1,0 +1,104 @@
+﻿@model IEnumerable<rcate_BugTracker.Models.CodeFirst.Ticket>
+
+@{
+    ViewBag.Title = "ArchivedAdmin";
+}
+
+<link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <i class="fa fa-ticket"></i> All Archived Tickets
+            </div>
+            <div class="col-md-6">
+                @Html.ActionLink("My Archived Tickets", "ArchivedTickets", "Tickets", new { @class = "pull-right btn btn-default" })
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Description</th>
+                        <th style="text-align:center">Project</th>
+                        <th style="text-align:center">Priority Level</th>
+                        <th style="text-align:center">Status</th>
+                        <th style="text-align:center">Developer</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Description</th>
+                        <th style="text-align:center">Project</th>
+                        <th style="text-align:center">Priority Level</th>
+                        <th style="text-align:center">Status</th>
+                        <th style="text-align:center">Developer</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                <tbody>
+
+
+                    @foreach (var item in Model)
+                    {
+                        if (item.Archived == true)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Project.Title)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                                </td>
+                                <td>
+                                    @if (item.AssignToUserId == null)
+                                    {
+                                        <p class="text-danger">No Developer is Assigned.</p>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.AssignToUser.FullName)
+                                    }
+                                </td>
+                                <td>
+                                    @if (User.IsInRole("ProjectManager") || User.IsInRole("DemoP") || User.IsInRole("Admin") || User.IsInRole("DemoA"))
+                                    {
+                                        <a style="color:black" href="@Url.Action("Edit", "Tickets", new { id = item.Id })">Edit Status</a>
+                                        <br />
+                                    }
+                                    <a style="color:black" href="@Url.Action("Details", "Tickets", new { id = item.Id })">Details</a>
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script>
+        $("#ataTable").DataTable();
+    </script>
+}
+
+

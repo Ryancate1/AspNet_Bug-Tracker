@@ -1,0 +1,238 @@
+﻿@model IEnumerable<rcate_BugTracker.Models.CodeFirst.Ticket>
+@using Microsoft.AspNet.Identity;
+
+@{
+    ViewBag.Title = "Home Page";
+    var user = User.Identity.GetUserId();
+}
+
+<!-- Breadcrumbs-->
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="#">Dashboard</a>
+    </li>
+    <li class="breadcrumb-item active">My Dashboard</li>
+</ol>
+
+
+    <br />
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Ticket Status Bar Chart-->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-bar-chart"></i> Ticket by Status
+                </div>
+                <div class="card-body">
+                    <canvas id="myBarChart" width="100" height="50"></canvas>
+                </div>
+                <div class="card-footer small text-muted">Updated @System.DateTime.Now</div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Priority Pie Chart-->
+            <div class="card mb-3" style="width:400px;height:500px">
+                <div class="card-header">
+                    <i class="fa fa-pie-chart"></i> Tickets by Priority Level
+                </div>
+                <div class="card-body">
+                    <canvas id="myPieChart" width="100%" height="100"></canvas>
+                </div>
+                <div class="card-footer small text-muted">Updated @System.DateTime.Now</div>
+            </div>
+        </div>
+    </div>
+
+
+<br />
+
+
+<link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <i class="fa fa-ticket"></i> Urgent Tickets
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Description</th>
+                        <th style="text-align:center">Project</th>
+                        <th style="text-align:center">Priority Level</th>
+                        <th style="text-align:center">Status</th>
+                        <th style="text-align:center">Developer</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Description</th>
+                        <th style="text-align:center">Project</th>
+                        <th style="text-align:center">Priority Level</th>
+                        <th style="text-align:center">Status</th>
+                        <th style="text-align:center">Developer</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        if (item.TicketPriority.Name == "Urgent")
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Project.Title)
+                                </td>
+                                <td>
+                                    @if (item.TicketPriorityId == 7)
+                                    {
+                                        <p class="text-success">Low</p>
+                                    }
+                                    else if (item.TicketPriorityId == 8)
+                                    {
+                                        <p class="text-warning">Moderate</p>
+                                    }
+                                    else if (item.TicketPriorityId == 9)
+                                    {
+                                        <p class="text-danger">Urgent</p>
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                                </td>
+                                <td>
+                                    @if (item.AssignToUserId == null)
+                                    {
+                                        <p class="text-danger">No Developer is Assigned.</p>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.AssignToUser.FullName)
+                                    }
+                                </td>
+                                <td>
+                                    @if (User.IsInRole("ProjectManager") || User.IsInRole("DemoP") || User.IsInRole("Admin") || User.IsInRole("DemoA"))
+                                    {
+                                        <a style="color:black" href="@Url.Action("AssignDeveloper", "Tickets", new { id = item.Id })">Assign Developer</a>
+                                        <br />
+                                    }
+
+                                    <a style="color:black" href="@Url.Action("Edit", "Tickets", new { id = item.Id })">Edit</a>
+                                    <br />
+                                    <a style="color:black" href="@Url.Action("Details", "Tickets", new { id = item.Id })">Details</a>
+                                </td>
+                            </tr>
+                        }
+
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script>
+        $("#ataTable").DataTable();
+    </script>
+    <script>
+        @{  var Low = Model.Where(t => t.TicketPriority.Name == "Low").Count();
+            var Moderate = Model.Where(t => t.TicketPriority.Name == "Moderate").Count();
+            var Urgent = Model.Where(t => t.TicketPriority.Name == "Urgent").Count();
+        }
+        // -- Priority Pie Chart JS
+
+        var ctx = document.getElementById("myPieChart");
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["Low", "Moderate", "Urgent"],
+                datasets: [{
+                    data: [@Low, @Moderate, @Urgent],
+                    backgroundColor: ['green', 'yellow', 'red'],
+                }],
+            },
+        });
+
+        @{
+            var Unassigned = Model.Where(t => t.TicketStatusId == 6).Count();
+            var Assigned = Model.Where(t => t.TicketStatusId == 7).Count();
+            var UnderConstruction = Model.Where(t => t.TicketStatusId == 8).Count();
+            var Testing = Model.Where(t => t.TicketStatusId == 9).Count();
+            var Finalized = Model.Where(t => t.TicketStatusId == 10).Count();
+        }
+
+        // -- Ticket Status Bar Chart JS
+        var ctx = document.getElementById("myBarChart");
+        var myLineChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Unassigned", "In Review", "Under Construction", "Testing", "Finalized"],
+                datasets: [{
+                    label: "Tickets",
+                    backgroundColor: "rgba(2,117,216,1)",
+                    borderColor: "rgba(2,117,216,1)",
+                    data: [@Unassigned, @Assigned, @UnderConstruction, @Testing, @Finalized],
+                }],
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'month'
+                        },
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 6
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            max: 10,
+                            maxTicksLimit: 5
+                        },
+                        gridLines: {
+                            display: true
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                }
+            }
+        });
+    </script>
+}
+
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fa fa-angle-up"></i>
+</a>
+
+
+
+

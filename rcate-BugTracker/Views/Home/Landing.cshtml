@@ -1,0 +1,58 @@
+﻿@{
+    Layout = "";
+}
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Bug Tracker</title>
+    <!-- Bootstrap core CSS-->
+    <link href="~/Assets/startbootstrap-sb-admin-gh-pages/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="~/Assets/startbootstrap-sb-admin-gh-pages/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="~/Assets/startbootstrap-sb-admin-gh-pages/css/sb-admin.css" rel="stylesheet">
+    <!--Animation-->
+    <link href="~/Content/animate.css" rel="stylesheet" />
+</head>
+
+<body style="text-align:center;background-color:black">
+    <div style="background-color:white;padding-bottom:30px">
+
+        <div class="jumbotron" style="background-color:black">
+            <h1 style="font-size:50px;color:white">Bug Tracker</h1>
+            <br />
+            <p style="color:white">
+                A bug tracker is a program used by a varitety of software companies to keep track of bugs and any other software or
+                hardware related issues.
+            </p>
+        </div>
+
+        <div class="animated pulse infinite" style="animation-duration:1.5s">
+            <img src="~/Assets/Images/LandingPageLogo.jpg" />
+        </div>
+
+        <br />
+
+        <p>The languages and libraries that I've used in this project are C#, HTML, CSS, Bootstrap, Jquery, as well as the MVC Framework.</p>
+
+        <br />
+
+        <a style="color:black" href="@Url.Action("Index", "Home")">Click Here to Continue</a>
+
+    </div>
+
+    <footer>
+        <p style="color:white;padding-top:10px">Copyright &copy; ROC-Bug-Tracker</p>
+    </footer>
+
+</body>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

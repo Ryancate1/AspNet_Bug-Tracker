@@ -1,0 +1,15 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+    Layout = "";
+}
+
+<center>
+    <h1 class="text-danger">Error!</h1>
+    <h2>An Error has occured.  You may:</h2>
+    <br />
+    <p>1. <a href="javascript:void(0);" onclick="history.go(-1);">Back to Previous Page</a></p>
+    <p>2. @Html.ActionLink("Go to Dashboard", "Index", "Home")</p>
+</center>
+

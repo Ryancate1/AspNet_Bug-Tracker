@@ -1,0 +1,94 @@
+﻿@model IEnumerable<rcate_BugTracker.Models.CodeFirst.Project>
+
+@{
+    ViewBag.Title = "AdminIndex";
+}
+
+<link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <i class="fa fa-area-chart"></i> All Projects
+            </div>
+            <div class="col-md-6">
+                @if (User.IsInRole("Admin") || User.IsInRole("DemoA") || User.IsInRole("ProjectManager") || User.IsInRole("DemoP"))
+                {
+                    @Html.ActionLink("Show My Projects", "Index", "Projects", new { @class = "pull-right btn" })
+                    <p style="padding-right:25px">
+                        <a class="btn btn-primary pull-right" href="@Url.Action("Create", "Projects")">Create New Project</a>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Created</th>
+                        <th style="text-align:center">Personnel</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Title</th>
+                        <th style="text-align:center">Created</th>
+                        <th style="text-align:center">Personnel</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        if (item.Archived == false)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    @Html.ToUserTime(item.Created, ViewBag.UserTimeZone as string, "MM/dd/yyyy")
+                                </td>
+                                <td>
+                                    @if (item.Users.Count() == 0)
+                                    {
+                                        <p class="text-danger">
+                                            There are no Personnel Assigned.
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        foreach (var user in item.Users)
+                                        {
+                                            @user.FullName <br />
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <a style="color:black" href="@Url.Action("ProjectUser", "Projects", new { id = item.Id })">Assign Personnel</a>
+                                    <br />
+                                    <a style="color:black" href="@Url.Action("Edit", "Projects", new { id = item.Id })">Edit Project</a>
+                                    <br />
+                                    <a style="color:black" href="@Url.Action("Details", "Projects", new { id = item.Id })">Project Details</a>
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script>
+        $("#ataTable").DataTable();
+    </script>
+}

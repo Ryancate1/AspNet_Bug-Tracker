@@ -1,0 +1,256 @@
+﻿@using Microsoft.AspNet.Identity;
+
+@model rcate_BugTracker.Models.CodeFirst.Ticket
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<center>
+    <h4>
+        <u>
+            Ticket For "@Html.DisplayFor(Model => Model.Project.Title)"
+        </u>
+    </h4>
+</center>
+
+<br />
+<br />
+
+<div class="row">
+    <div class="col-md-6" style="border-right:solid black 1px;text-align:center">
+        <dl style="font-size:16px">
+            <dt>Ticket Title:</dt>
+            <dd>@Html.DisplayFor(model => model.Title)</dd>
+
+            <br />
+
+            <dt>Ticket Description:</dt>
+            <dd>@Html.DisplayFor(model => model.Description)</dd>
+
+            <br />
+
+            <dt>Created Date:</dt>
+            <dd>@Html.ToUserTime(Model.Created, ViewBag.UserTimeZone as string, "MM/dd/yyyy")</dd>
+
+            <br />
+
+            <dt>Updated Date:</dt>
+            <dd>
+                @Html.DisplayFor(model => model.Updated)
+            </dd>
+
+            <br />
+
+            <dt>Owner:</dt>
+            <dd>@Html.DisplayFor(model => model.OwnerUser.FullName)</dd>
+
+            <br />
+
+            <dt>Assigned Developer:</dt>
+            <dd>@Html.DisplayFor(model => model.AssignToUser.FullName)</dd>
+
+            <br />
+
+            <dt>Ticket Priority:</dt>
+            <dd>@Html.DisplayFor(model => model.TicketPriority.Name)</dd>
+
+            <br />
+
+            <dt>Ticket Status:</dt>
+            <dd>@Html.DisplayFor(model => model.TicketStatus.Name)</dd>
+        </dl>
+
+    </div>
+    <div class="col-md-6" style="overflow-y:scroll;max-height:610px">
+
+        <center>
+            <h6><u>Ticket History</u></h6>
+        </center>
+
+        <br />
+
+        @if (Model.Histories.Count() == 0)
+        {
+            <center>
+                <span>
+                    This Ticket has no History.
+                </span>
+            </center>
+        }
+        else
+        {
+            foreach (var history in Model.Histories.OrderByDescending(h => h.Created))
+            {
+
+                <div class="timeline">
+                    <div class="container right" style="background-color:black;color:white;border-radius:15px">
+                        <div class="content">
+                            <h2>@history.Created.ToString("d")</h2>
+                            <p><b>@history.Author.FullName</b> has changed the <b>@history.Property</b> from "<b>@history.OldValue</b>" to
+                            "<b>@history.NewValue</b>"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+            }
+        }
+
+
+    </div>
+
+    <p style="padding-left:25px">
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Id })<br />
+        @Html.ActionLink("Back to Tickets", "Index", "Tickets")
+    </p>
+
+</div>
+
+<hr />
+<br />
+
+<h4 style="text-align:center">Ticket Attachments</h4>
+
+<br />
+
+<div class="row" style="padding-left:250px">
+    <center>
+        @using (Html.BeginForm("CreateAttachment", "Tickets", FormMethod.Post, new { enctype = "Multipart/form-data" }))
+            {
+
+            @Html.AntiForgeryToken()
+
+            <input type="number" name="TicketId" value="@Model.Id" hidden />
+            <div class="form-group btn-group">
+                <dt>
+                    <div>Upload File: &nbsp;</div>
+                </dt>
+                    <input name="attachFile" type="file" />
+                    <input type="text" name="Description" placeholder="File description" required />
+                    <button value="submit">Attach</button>
+            </div>
+        }
+        @foreach (var ticketattachment in Model.Attatchments.OrderByDescending(c => c.Id))
+            {
+
+            <p>
+
+                <a href="@ticketattachment.FileUrl" class="btn btn-info" target="_blank">@ticketattachment.Description</a> <br />
+
+                @if (User.IsInRole("Admin") || User.IsInRole("DemoA") || User.IsInRole("ProjectManager") || User.IsInRole("DemoP") || User.Identity.GetUserId() == ticketattachment.AuthorId)
+                {
+                    using (Html.BeginForm("DeleteAttachment", "Tickets", new { id = ticketattachment.Id }, FormMethod.Post, new { @class = "form-horizontal" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="submit" id="deleteAttachment" class="btn btn-default" value="Delete File" />
+                    }
+                }
+                <br />
+
+                Author: @ticketattachment.Author.FullName | Uploaded On: @Html.ToUserTime(ticketattachment.Created, ViewBag.UserTimeZone as string, "MM-dd-yyyy")
+            </p>
+
+        }
+    </center>
+</div>
+
+
+<hr />
+
+@if (User.Identity.IsAuthenticated)
+{
+    using (Html.BeginForm("CreateComment", "Tickets", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+
+        @Html.AntiForgeryToken();
+        <input name="TicketId" value="@Model.Id" hidden />
+        <div style="padding-bottom:15px">
+            <center>
+                <h5><u>Ticket Comments</u></h5>
+                <textarea style="width:400px;text-align:center" name="Body" type="text" rows="3" placeholder="...">@ViewBag.Comment</textarea>
+                @*<br />
+                    <input type="file" value="Attatchment" />*@
+                <br />
+                <br />
+                <button class="btn btn-outline-primary" type="submit">Submit Comment</button>
+            </center>
+        </div>
+    }
+}
+
+<br />
+
+<br />
+
+@if (Model.Comment.Count == 0)
+{
+    <center style="padding:20px">This Ticket has no Comments.</center>
+}
+else
+{
+
+
+    foreach (var comment in Model.Comment)
+    {
+
+        <div style="border:1px solid black;background-color:whitesmoke">
+            <div class="row">
+                <div class="col-md-6">
+                    <span style="padding-left:10px" class="post-meta">@Html.DisplayFor(modelcomment => comment.Author.FullName)</span>
+                    <br />
+                    <span style="padding-left:10px;padding-right:10px" class="post-meta">@comment.Created.ToString("d")</span>
+                </div>
+                <div class="col-md-6">
+                    @if (User.IsInRole("Admin") || User.IsInRole("DemoA") || User.Identity.GetUserId() == comment.AuthorId)
+                    {
+                        <div class="pull-right" style="padding-right:25px">
+                            @Html.ActionLink("Edit", "EditComment", new { id = comment.Id }, null)<br />
+                            @Html.ActionLink("Delete", "DeleteComment", new { id = comment.Id }, null)
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <center style="padding:15px">@Html.DisplayFor(modelcomment => comment.Body)</center>
+
+
+        </div>
+        <br />
+    }
+}
+
+<!--Sweet Alerts-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.10.1/sweetalert2.all.min.js"></script>
+<script src="~/Assets/plugins/sweetalert/sweetalert-dev.js"></script>
+<script src="~/Assets/plugins/sweetalert/jquery.sweet-alert.custom.js"></script>
+<script src="~/Assets/plugins/sweetalert/sweetalert.min.js"></script>
+<script>
+    $('#deleteAttachment').on('click', function (e) {
+        e.preventDefault();
+        var form = $(this).parents('form');
+        swal({
+            title: "Delete Attachment",
+            text: "Are you sure you would like to delete this Attachment?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            showCloseButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonText:
+            'Yes, delete',
+            confirmButtonAriaLabel: 'Thumbs up, great!',
+            cancelButtonText:
+            'Cancel',
+            cancelButtonAriaLabel: 'Thumbs down',
+            closeOnConfirm: false
+        }, function (isConfirm) {
+            if (isConfirm) form.submit();
+        }
+        )
+
+            ;
+    })
+</script>
+

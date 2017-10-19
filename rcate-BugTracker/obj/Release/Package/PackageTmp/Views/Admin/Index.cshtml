@@ -1,0 +1,86 @@
+﻿@model IEnumerable<rcate_BugTracker.Models.Helpers.AdminUserViewModels>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <i class="fa fa-table"></i> Personnel
+            </div>
+            <div class="col-md-6">
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Name</th>
+                        <th style="text-align:center">Email</th>
+                        <th style="text-align:center">Phone Number</th>
+                        <th style="text-align:center">Roles</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr style="background-color:whitesmoke">
+                        <th style="text-align:center">Name</th>
+                        <th style="text-align:center">Email</th>
+                        <th style="text-align:center">Phone Number</th>
+                        <th style="text-align:center">Roles</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <center>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.User.FullName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.User.Email)
+                                </td>
+                                <td>
+                                    @if (item.User.PhoneNumber == null)
+                                    {
+                                        <p>-</p>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.User.PhoneNumber)
+                                    }
+
+                                </td>
+                                <td>
+                                    @foreach (var role in item.SelectedRoles)
+                                    {
+                                        @role<br />
+                                    }
+                                </td>
+                                <td>
+                                    <a style="color:black" href="@Url.Action("EditUserRoles", "Admin", new { id = item.User.Id }, null)">Manage Roles</a>
+                                </td>
+                            </center>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    @section scripts{
+        <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+        <script>
+            $("#ataTable").DataTable();
+        </script>
+    }
